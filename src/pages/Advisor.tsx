@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ChatMessage } from '../types';
-import { GoogleGenAI } from "@google/genai";
+import { getAiAdvisorResponse } from '../services/geminiService';
 
 export const Advisor = () => {
   const { t, language } = useLanguage();
@@ -27,43 +27,22 @@ export const Advisor = () => {
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
     setInput('');
     setLoading(true);
 
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: input,
-        config: {
-          systemInstruction: `You are Dr. $mart, a friendly financial advisor for Hong Kong tertiary students. 
-          Respond in ${language === 'en' ? 'English' : 'Traditional Chinese (Hong Kong)'}. 
-          Focus on student-specific topics like Grant/Loan, student budgeting, Octopus card usage, and MPF for part-time jobs. 
-          Keep advice practical, encouraging, and easy to understand.`,
-        },
-      });
+    const responseText = await getAiAdvisorResponse(nextMessages, language);
 
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        text: response.text || "I'm sorry, I couldn't process that.",
-        timestamp: new Date()
-      };
+    const assistantMessage: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      text: responseText,
+      timestamp: new Date()
+    };
 
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error(error);
-      const errorMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        text: "Sorry, I'm having trouble connecting to my financial brain right now. Please try again later!",
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setLoading(false);
-    }
+    setMessages(prev => [...prev, assistantMessage]);
+    setLoading(false);
   };
 
   return (

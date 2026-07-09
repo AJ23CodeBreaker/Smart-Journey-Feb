@@ -2,6 +2,11 @@ import { Language, Level } from './types';
 
 export const APP_VERSION = '1.1.0';
 
+// --- AI PROVIDER CONFIGURATION ---
+// Using APIYI (https://apiyi.com) as an OpenAI-API-compatible relay.
+export const AI_API_BASE_URL = 'https://api.apiyi.com/v1';
+export const AI_MODEL = 'claude-haiku-4-5-20251001';
+
 // --- EMAILJS CONFIGURATION ---
 export const EMAILJS_CONFIG = {
   SERVICE_ID: 'service_ryecfaz',
